@@ -4,5 +4,5 @@ namespace WritingSessionsAspApi.Models;
 
 public class AppUser : IdentityUser
 {
-    public DateTime SignUpDate { get; set; }
+    public DateTime SignUpDate { get; set; } 
 }
