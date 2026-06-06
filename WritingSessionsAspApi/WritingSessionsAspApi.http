@@ -1,0 +1,6 @@
+@WritingSessionsAspApi_HostAddress = http://localhost:5088
+
+GET {{WritingSessionsAspApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
