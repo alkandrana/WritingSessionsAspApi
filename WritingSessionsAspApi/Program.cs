@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using WritingSessionsAspApi.Data;
+using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi;
@@ -31,7 +32,7 @@ public class Program
             options.SerializerSettings.ReferenceLoopHandling = 
                 ReferenceLoopHandling.Ignore;
         });
-        
+        builder.Services.AddScoped(typeof(IRecordRepo<>), typeof(RecordRepo<>));
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
