@@ -1,27 +1,36 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WritingSessionsAspApi.Data;
 using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
 [ApiController]
 [Route("projects")]
+[Authorize]
 public class ProjectController : Controller
 {
     private readonly IRecordRepo<Project> _projectRepo;
+    private readonly UserManager<AppUser> _userManager;
 
-    public ProjectController(IRecordRepo<Project> projectRepo)
+    public ProjectController(IRecordRepo<Project> projectRepo, UserManager<AppUser> userManager)
     {
         _projectRepo = projectRepo;
+        _userManager = userManager;
     }
     
     // GET: /projects
     [HttpGet]
     public async Task<IActionResult> GetAllProjects()
     {
-        List<Project> projects = await _projectRepo.GetAllRecordsAsync();
+        AppUser? currentUser = await _userManager.GetUserAsync(User);
+        Console.WriteLine(currentUser);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+        List<Project> projects = await _projectRepo.GetSelectRecordsAsync(p => p.AuthorId == currentUser.Id);
         return Ok(projects);
     }
     
@@ -52,6 +61,12 @@ public class ProjectController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateProject(Project project)
     {
+        AppUser? currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+        project.AuthorId = currentUser.Id;
         int rowsAffected = await _projectRepo.CreateRecordAsync(project);
         if (rowsAffected == 0)
         {
@@ -61,6 +76,10 @@ public class ProjectController : Controller
     }
 
     [HttpPatch("{id:int}")]
+    // request format: { "op": "replace", "path": "/title", "value": "The Shadow of Death" }
+    // Path refers to the property you're targeting
+    // If changing more than one property, send array of objects
+    // Even if only changing one property, must be formatted as an array
     public async Task<IActionResult> UpdateProject([FromRoute] int id, [FromBody] JsonPatchDocument<Project> projectData)
     {
         if (projectData == null)
