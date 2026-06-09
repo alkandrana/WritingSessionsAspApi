@@ -12,4 +12,5 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole, string>
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<Scene> Scenes => Set<Scene>();
     public DbSet<Project> Projects => Set<Project>();
+    public DbSet<Status> Statuses => Set<Status>();
 }

@@ -5,7 +5,7 @@ namespace WritingSessionsAspApi.Data.Contracts;
 public interface IRecordRepo<TEntity> where TEntity : Model
 {
     public Task<List<TEntity>> GetAllRecordsAsync();
-    public Task<List<TEntity>> GetSelectRecordsAsync(Expression<Func<TEntity, bool>> filter);
+    public Task<List<TEntity>> GetSelectRecordsAsync(Expression<Func<TEntity, bool>> filter, params Expression<Func<TEntity, object>>[] orderBy);
     
     public Task<TEntity?> GetRecordByIdAsync(int id, params Expression<Func<TEntity, object>>[] includes);
     

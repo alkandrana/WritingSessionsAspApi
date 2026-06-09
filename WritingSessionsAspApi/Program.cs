@@ -59,6 +59,12 @@ public class Program
 
         app.MapControllers();
         app.MapIdentityApi<AppUser>();
+        
+        using (var scope = app.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            SeedData.Seed(context);
+        }
 
         app.Run();
     }

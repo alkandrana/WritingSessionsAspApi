@@ -11,5 +11,8 @@ public class Session : Model
     public DateTime? StopTime { get; set; }
     public int Words { get; set; }
     public int SceneId { get; set; }
+    public Scene? Scene { get; set; }
+    
+    public AppUser? Author { get; set; }
     public string? Comments { get; set; }
 }

@@ -1,7 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WritingSessionsAspApi.Data;
 using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
@@ -11,19 +10,27 @@ namespace WritingSessionsAspApi.Controllers;
 public class SessionController : Controller
 {
     private readonly IRecordRepo<Session> _sessionRepo;
-    private readonly AppDbContext _ctx;
-
-    public SessionController(IRecordRepo<Session> sessionRepo, AppDbContext ctx)
+    private readonly UserManager<AppUser> _userManager;
+    public SessionController(IRecordRepo<Session> sessionRepo, UserManager<AppUser> userManager)
     {
         _sessionRepo = sessionRepo;
-        _ctx = ctx;
+        _userManager = userManager;
     }
     
     // GET: /sessions
     [HttpGet]
     public async Task<IActionResult> GetAllSessions()
     {
-        List<Session> sessions = await _sessionRepo.GetAllRecordsAsync();
+        AppUser? currentUser = await _userManager.GetUserAsync(HttpContext.User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+        List<Session> sessions = await _sessionRepo
+            .GetSelectRecordsAsync(
+                s => s.Author.Id == currentUser.Id,
+                s => s.Scene
+                );
         return Ok(sessions);
     }
     
@@ -43,7 +50,7 @@ public class SessionController : Controller
     [Route("/sessions/scene/{sceneId:int}")]
     public async Task<IActionResult> GetSessionsByScene(int sceneId)
     {
-        List<Session> sessions = await _ctx.Sessions.Where(ses => ses.SceneId == sceneId).ToListAsync();
+        List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(ses => ses.SceneId == sceneId);
         return Ok(sessions);
     }
 

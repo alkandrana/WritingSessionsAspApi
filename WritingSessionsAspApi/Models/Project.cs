@@ -12,6 +12,6 @@ public class Project : Model
     [StringLength(255)] public string Title { get; set; } = string.Empty;
     [StringLength(255)] public string Series { get; set; } = string.Empty;
     public int Goal { get; set; }
-    public string? AuthorId { get; set; }
+    public string AuthorId { get; set; }
     [ForeignKey("AuthorId")] public AppUser? Author { get; set; }
 }
