@@ -47,14 +47,14 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity> where TEntity : Model
         return record;
     }
 
-    public async Task<TEntity?> GetRecordByCodeAsync(string code, params Expression<Func<TEntity, object>>[] includes)
+    public async Task<TEntity?> GetRecordByCodeAsync(string code, string propName, params Expression<Func<TEntity, object>>[] includes)
     {
         IQueryable<TEntity> query = _dbSet;
         foreach (var include in includes)
         {
             query = query.Include(include);
         }
-        TEntity? record = await query.FirstOrDefaultAsync(e => EF.Property<string>(e, "Code") == code);
+        TEntity? record = await query.FirstOrDefaultAsync(e => EF.Property<string>(e, propName).ToLower() == code.ToLower());
         return record;
     }
 

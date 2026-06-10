@@ -50,7 +50,7 @@ public class ProjectController : Controller
     [Route("/projects/code/{code}")]
     public async Task<IActionResult> GetProjectByCode(string code)
     {
-        Project? project = await _projectRepo.GetRecordByCodeAsync(code);
+        Project? project = await _projectRepo.GetRecordByCodeAsync(code, "Code");
         if (project == null)
         {
             return NotFound();

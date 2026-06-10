@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using WritingSessionsAspApi.Models;
 namespace WritingSessionsAspApi.Controllers;
 [ApiController]
 [Route("sessions")]
+[Authorize]
 public class SessionController : Controller
 {
     private readonly IRecordRepo<Session> _sessionRepo;
@@ -21,7 +23,7 @@ public class SessionController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAllSessions()
     {
-        AppUser? currentUser = await _userManager.GetUserAsync(HttpContext.User);
+        AppUser? currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)
         {
             return Unauthorized();
@@ -57,6 +59,12 @@ public class SessionController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateSession(Session session)
     {
+        AppUser? currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+        session.Author = currentUser;
         int rowsAffected = await _sessionRepo.CreateRecordAsync(session);
         if (rowsAffected == 0)
         {

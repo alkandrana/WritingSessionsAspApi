@@ -9,7 +9,7 @@ public interface IRecordRepo<TEntity> where TEntity : Model
     
     public Task<TEntity?> GetRecordByIdAsync(int id, params Expression<Func<TEntity, object>>[] includes);
     
-    public Task<TEntity?> GetRecordByCodeAsync(string code, params Expression<Func<TEntity, object>>[] includes);
+    public Task<TEntity?> GetRecordByCodeAsync(string code, string propName, params Expression<Func<TEntity, object>>[] includes);
     
     public Task<int> CreateRecordAsync(TEntity record);
     

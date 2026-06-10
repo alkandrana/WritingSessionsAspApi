@@ -13,8 +13,8 @@ public class Scene : Model
     [StringLength(255)]
     public string Name { get; set; } = string.Empty;
     public int Words { get; set; }
-    public int StatusId { get; set; }
-    public Status? Status { get; set; } = new Status { Name = "pending" };
+    public int StatusId { get; set; } = 3;
+    public Status? Status { get; set; }
     [StringLength(255)]
     public string? Plotline { get; set; }
     public int ProjectId { get; set; }
