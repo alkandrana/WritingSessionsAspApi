@@ -67,6 +67,15 @@ public class ProjectController : Controller
             return Unauthorized();
         }
         project.AuthorId = currentUser.Id;
+        Project? duplicate = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
+        if (duplicate != null)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Title = "Duplicate code",
+                Detail = "A project with the same code already exists.",
+            });
+        }
         int rowsAffected = await _projectRepo.CreateRecordAsync(project);
         if (rowsAffected == 0)
         {

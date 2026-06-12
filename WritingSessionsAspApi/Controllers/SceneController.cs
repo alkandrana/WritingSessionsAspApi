@@ -62,6 +62,16 @@ public class SceneController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateScene(Scene scene)
     {
+        List<Scene> duplicates = await _sceneRepo.GetSelectRecordsAsync(
+            sc => sc.Code.ToLower() == scene.Code.ToLower() && sc.ProjectId == scene.ProjectId);
+        if (duplicates.Any())
+        {
+            return Conflict(new ProblemDetails
+            {
+                Title = "Duplicate scene code",
+                Detail = "A scene with the same code already exists.",
+            });
+        }
         int rowsAffected = await _sceneRepo.CreateRecordAsync(scene);
         if (rowsAffected == 0)
         {

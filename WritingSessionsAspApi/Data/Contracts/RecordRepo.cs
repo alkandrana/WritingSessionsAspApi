@@ -57,6 +57,8 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity> where TEntity : Model
         TEntity? record = await query.FirstOrDefaultAsync(e => EF.Property<string>(e, propName).ToLower() == code.ToLower());
         return record;
     }
+    
+    // public async Task<bool> Check
 
     public async Task<int> CreateRecordAsync(TEntity record)
     {

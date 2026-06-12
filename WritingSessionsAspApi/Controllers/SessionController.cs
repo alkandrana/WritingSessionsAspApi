@@ -52,7 +52,18 @@ public class SessionController : Controller
     [Route("/sessions/scene/{sceneId:int}")]
     public async Task<IActionResult> GetSessionsByScene(int sceneId)
     {
-        List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(ses => ses.SceneId == sceneId);
+        List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
+            ses => ses.SceneId == sceneId, s => s.Scene);
+        return Ok(sessions);
+    }
+
+    [HttpGet]
+    [Route("/sessions/project/{projectId:int}")]
+    public async Task<IActionResult> GetSessionsByProject(int projectId)
+    {
+        List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
+            ses => ses.Scene.ProjectId == projectId,
+            s => s.Scene);
         return Ok(sessions);
     }
 
@@ -65,6 +76,16 @@ public class SessionController : Controller
             return Unauthorized();
         }
         session.Author = currentUser;
+        List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(
+            ses => ses.StartTime == session.StartTime && ses.StopTime == session.StopTime);
+        if (duplicates.Any())
+        {
+            return Conflict(new ProblemDetails
+            {
+                Title = "Duplicate session timeframe",
+                Detail = "A session with those times already exists.",
+            });
+        }
         int rowsAffected = await _sessionRepo.CreateRecordAsync(session);
         if (rowsAffected == 0)
         {
