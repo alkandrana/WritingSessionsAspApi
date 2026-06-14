@@ -15,4 +15,31 @@ public class Session : Model
     
     public AppUser? Author { get; set; }
     public string? Comments { get; set; }
+
+    public double? Duration
+    {
+        get
+        {
+            if (StartTime != null && StopTime != null)
+            {
+                TimeSpan? duration = StopTime - StartTime;
+                double? minutes = duration?.TotalMinutes;
+                return minutes;
+            }
+            return null;
+        }
+    }
+
+    public double? Wpm
+    {
+        get
+        {
+            if (Duration != null)
+            {
+                double? wpm = Words / Duration;
+                return wpm;
+            }
+            return null;
+        }
+    }
 }

@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace WritingSessionsAspApi.Data.Contracts;
 
@@ -21,16 +22,17 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity> where TEntity : Model
         return records;
     }
 
-    public async Task<List<TEntity>> GetSelectRecordsAsync(Expression<Func<TEntity, bool>>? filter = null, params Expression<Func<TEntity, object>>[] includes)
+    public async Task<List<TEntity>> GetSelectRecordsAsync(Expression<Func<TEntity, bool>>? filter = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null)
     {
         IQueryable<TEntity> query = _dbSet;
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
         if (filter != null)
         {
             query = query.Where(filter);
+        }
+
+        if (include != null)
+        {
+            query = include(query);
         }
         List<TEntity> records = await query.ToListAsync();
         return records;

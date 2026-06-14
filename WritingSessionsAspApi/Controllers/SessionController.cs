@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
@@ -31,8 +32,7 @@ public class SessionController : Controller
         List<Session> sessions = await _sessionRepo
             .GetSelectRecordsAsync(
                 s => s.Author.Id == currentUser.Id,
-                s => s.Scene
-                );
+                qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project));
         return Ok(sessions);
     }
     
@@ -53,7 +53,8 @@ public class SessionController : Controller
     public async Task<IActionResult> GetSessionsByScene(int sceneId)
     {
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
-            ses => ses.SceneId == sceneId, s => s.Scene);
+            ses => ses.SceneId == sceneId, 
+            qu => qu.Include(s => s.Scene));
         return Ok(sessions);
     }
 
@@ -63,7 +64,7 @@ public class SessionController : Controller
     {
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
             ses => ses.Scene.ProjectId == projectId,
-            s => s.Scene);
+            qu => qu.Include(s => s.Scene));
         return Ok(sessions);
     }
 
