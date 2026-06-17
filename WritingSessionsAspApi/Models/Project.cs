@@ -15,4 +15,6 @@ public class Project : Model
     public DateTime? Created { get; set; }
     public string? AuthorId { get; set; }
     [ForeignKey("AuthorId")] public AppUser? Author { get; set; }
+
+    public List<Scene> Scenes { get; set; } = new List<Scene>();
 }

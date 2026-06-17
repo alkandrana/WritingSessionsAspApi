@@ -11,12 +11,12 @@ namespace WritingSessionsAspApi.Controllers;
 public class SceneController : Controller
 {
     private readonly IRecordRepo<Scene> _sceneRepo;
-    private readonly AppDbContext _ctx;
+    private readonly IRecordRepo<Project> _projectRepo;
 
-    public SceneController(IRecordRepo<Scene> sceneRepo, AppDbContext ctx)
+    public SceneController(IRecordRepo<Scene> sceneRepo, IRecordRepo<Project> projectRepo)
     {
         _sceneRepo = sceneRepo;
-        _ctx = ctx;
+        _projectRepo = projectRepo;
     }
     
     // GET: /sessions
@@ -58,6 +58,8 @@ public class SceneController : Controller
         List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc => sc.ProjectId == projectId);
         return Ok(scenes);
     }
+
+    
 
     [HttpPost]
     public async Task<IActionResult> CreateScene(Scene scene)

@@ -12,12 +12,14 @@ namespace WritingSessionsAspApi.Controllers;
 public class ProjectController : Controller
 {
     private readonly IRecordRepo<Project> _projectRepo;
+    private readonly IRecordRepo<Scene> _sceneRepo;
     private readonly UserManager<AppUser> _userManager;
 
-    public ProjectController(IRecordRepo<Project> projectRepo, UserManager<AppUser> userManager)
+    public ProjectController(IRecordRepo<Project> projectRepo, UserManager<AppUser> userManager, IRecordRepo<Scene> sceneRepo)
     {
         _projectRepo = projectRepo;
         _userManager = userManager;
+        _sceneRepo = sceneRepo;
     }
     
     // GET: /projects
@@ -33,7 +35,38 @@ public class ProjectController : Controller
         List<Project> projects = await _projectRepo.GetSelectRecordsAsync(p => p.AuthorId == currentUser.Id);
         return Ok(projects);
     }
-    
+
+    [HttpGet]
+    [Route("/projects/plotter/{projectCode}")]
+    public async Task<IActionResult> GetPlotter(string projectCode)
+    {
+        Project? project = await _projectRepo.GetRecordByCodeAsync(
+            projectCode, "Code", p => p.Scenes);
+        if (project == null)
+        {
+            return NotFound();
+        }
+
+        List<Scene> scenes = project.Scenes;
+        List<PlotVM> plotter = new List<PlotVM>();
+        int wordCount = 0;
+        foreach (Scene sc in scenes)
+        {
+            wordCount += sc.Words;
+            PlotVM entry = new PlotVM
+            {
+                Sequence = sc.Sequence,
+                Name = sc.Name,
+                WordCount = sc.Words,
+                TSF = wordCount,
+                POT = (wordCount / (float)project.Goal) * 100,
+            };
+            entry.SetBeat();
+            plotter.Add(entry);
+        }
+        return Ok(plotter);
+    }
+
     // GET: /projects/:id
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProjectById(int id)
