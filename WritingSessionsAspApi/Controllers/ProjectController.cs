@@ -67,6 +67,10 @@ public class ProjectController : Controller
             return Unauthorized();
         }
         project.AuthorId = currentUser.Id;
+        if (project.Created == null)
+        {
+            project.Created = DateTime.UtcNow;
+        }
         Project? duplicate = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
         if (duplicate != null)
         {

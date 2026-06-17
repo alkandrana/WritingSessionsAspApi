@@ -17,6 +17,7 @@ public class Scene : Model
     public Status? Status { get; set; }
     [StringLength(255)]
     public string? Plotline { get; set; }
+    public DateTime? Created { get; set; }
     public int ProjectId { get; set; }
     public Project? Project { get; set; }
 }

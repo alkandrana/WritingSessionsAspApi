@@ -62,6 +62,10 @@ public class SceneController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateScene(Scene scene)
     {
+        if (scene.Created == null)
+        {
+            scene.Created = DateTime.UtcNow;
+        }
         List<Scene> duplicates = await _sceneRepo.GetSelectRecordsAsync(
             sc => sc.Code.ToLower() == scene.Code.ToLower() && sc.ProjectId == scene.ProjectId);
         if (duplicates.Any())
