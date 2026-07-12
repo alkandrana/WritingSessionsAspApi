@@ -40,14 +40,16 @@ public class ProjectController : Controller
     [Route("/projects/plotter/{projectCode}")]
     public async Task<IActionResult> GetPlotter(string projectCode)
     {
-        Project? project = await _projectRepo.GetRecordByCodeAsync(
+        List<Project> projects = await _projectRepo.GetRecordByCodeAsync(
             projectCode, "Code", p => p.Scenes);
-        if (project == null)
+        if (projects.Count == 0)
         {
             return NotFound();
         }
+        Project project = projects[0];
 
         List<Scene> scenes = project.Scenes;
+        scenes.Sort((x, y) => x.Sequence.CompareTo(y.Sequence));
         List<PlotVM> plotter = new List<PlotVM>();
         int wordCount = 0;
         foreach (Scene sc in scenes)
@@ -83,12 +85,12 @@ public class ProjectController : Controller
     [Route("/projects/code/{code}")]
     public async Task<IActionResult> GetProjectByCode(string code)
     {
-        Project? project = await _projectRepo.GetRecordByCodeAsync(code, "Code");
-        if (project == null)
+        List<Project> projects = await _projectRepo.GetRecordByCodeAsync(code, "Code");
+        if (projects.Count == 0)
         {
             return NotFound();
         }
-        return Ok(project);
+        return Ok(projects);
     }
 
     [HttpPost]
@@ -104,8 +106,8 @@ public class ProjectController : Controller
         {
             project.Created = DateTime.UtcNow;
         }
-        Project? duplicate = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
-        if (duplicate != null)
+        List<Project> duplicates = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
+        if (duplicates.Count > 0)
         {
             return Conflict(new ProblemDetails
             {

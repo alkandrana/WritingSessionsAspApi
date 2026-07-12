@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WritingSessionsAspApi.Data;
 using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
@@ -14,10 +15,12 @@ public class SessionController : Controller
 {
     private readonly IRecordRepo<Session> _sessionRepo;
     private readonly UserManager<AppUser> _userManager;
-    public SessionController(IRecordRepo<Session> sessionRepo, UserManager<AppUser> userManager)
+    private readonly AppDbContext _ctx;
+    public SessionController(IRecordRepo<Session> sessionRepo, UserManager<AppUser> userManager, AppDbContext ctx)
     {
         _sessionRepo = sessionRepo;
         _userManager = userManager;
+        _ctx = ctx;
     }
     
     // GET: /sessions
@@ -71,6 +74,9 @@ public class SessionController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateSession(Session session)
     {
+        Console.WriteLine("Creating session:");
+        Console.WriteLine(session.StartTime);
+        Console.WriteLine(session.StopTime);
         AppUser? currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)
         {
@@ -78,7 +84,7 @@ public class SessionController : Controller
         }
         session.Author = currentUser;
         List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(
-            ses => ses.StartTime == session.StartTime && ses.StopTime == session.StopTime);
+            ses => ses.StartTime != null && ses.StartTime == session.StartTime && ses.StopTime != null && ses.StopTime == session.StopTime);
         if (duplicates.Any())
         {
             return Conflict(new ProblemDetails
@@ -86,6 +92,19 @@ public class SessionController : Controller
                 Title = "Duplicate session timeframe",
                 Detail = "A session with those times already exists.",
             });
+        }
+        Scene? currentScene = await _ctx.Scenes.FirstOrDefaultAsync(s => s.Id == session.SceneId);
+        if (currentScene == null)
+        {
+            return NotFound();
+        }
+
+        currentScene.Words += session.Words;
+        _ctx.Scenes.Update(currentScene);
+        int sceneRowsAffected = await _ctx.SaveChangesAsync();
+        if (sceneRowsAffected == 0)
+        {
+            return Problem("Failed to update scene word count.");
         }
         int rowsAffected = await _sessionRepo.CreateRecordAsync(session);
         if (rowsAffected == 0)

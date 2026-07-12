@@ -24,11 +24,11 @@ public class StatusController : Controller
     [HttpGet("{name}")]
     public async Task<IActionResult> GetOptionByName(string name)
     {
-        Status? option = await _statusRepo.GetRecordByCodeAsync(name, "Name");
-        if (option == null)
+        List<Status> options = await _statusRepo.GetRecordByCodeAsync(name, "Name");
+        if (options.Count > 0)
         {
             return NotFound();
         }
-        return Ok(option);
+        return Ok(options);
     }
 }

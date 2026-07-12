@@ -43,12 +43,12 @@ public class SceneController : Controller
     [Route("/scenes/code/{code}")]
     public async Task<IActionResult> GetSceneByCode(string code)
     {
-        Scene? scene = await _sceneRepo.GetRecordByCodeAsync(code, "Code", sc => sc.Project);
-        if (scene == null)
+        List<Scene> scenes = await _sceneRepo.GetRecordByCodeAsync(code, "Code", sc => sc.Project);
+        if (scenes.Count == 0)
         {
             return NotFound();
         }
-        return Ok(scene);
+        return Ok(scenes);
     }
 
     [HttpGet]
@@ -77,6 +77,14 @@ public class SceneController : Controller
                 Title = "Duplicate scene code",
                 Detail = "A scene with the same code already exists.",
             });
+        }
+
+        if (scene.Sequence == 0)
+        {
+            List<Scene> otherScenes = await _sceneRepo.GetSelectRecordsAsync(sc => sc.ProjectId == scene.ProjectId);
+            otherScenes.Sort((a, b) => a.Sequence.CompareTo(b.Sequence));
+            int lastSequence = otherScenes.Last().Sequence;
+            scene.Sequence = lastSequence + 1;
         }
         int rowsAffected = await _sceneRepo.CreateRecordAsync(scene);
         if (rowsAffected == 0)
