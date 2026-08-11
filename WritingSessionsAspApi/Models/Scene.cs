@@ -12,11 +12,11 @@ public class Scene : Model
     public int Sequence { get; set; }
     [StringLength(255)]
     public string Name { get; set; } = string.Empty;
+    public string? Chapter { get; set; } 
     public int Words { get; set; }
     public int StatusId { get; set; } = 3;
     public Status? Status { get; set; }
-    [StringLength(255)]
-    public string? Plotline { get; set; }
+    [StringLength(255)] public string? Plotline { get; set; } = "";
     public DateTime? Created { get; set; }
     public int ProjectId { get; set; }
     public Project? Project { get; set; }

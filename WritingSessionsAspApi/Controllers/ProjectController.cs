@@ -13,13 +13,15 @@ public class ProjectController : Controller
 {
     private readonly IRecordRepo<Project> _projectRepo;
     private readonly IRecordRepo<Scene> _sceneRepo;
+    private readonly IRecordRepo<Status> _statusRepo;
     private readonly UserManager<AppUser> _userManager;
 
-    public ProjectController(IRecordRepo<Project> projectRepo, UserManager<AppUser> userManager, IRecordRepo<Scene> sceneRepo)
+    public ProjectController(IRecordRepo<Project> projectRepo, UserManager<AppUser> userManager, IRecordRepo<Scene> sceneRepo, IRecordRepo<Status> statusRepo)
     {
         _projectRepo = projectRepo;
         _userManager = userManager;
         _sceneRepo = sceneRepo;
+        _statusRepo = statusRepo;
     }
     
     // GET: /projects
@@ -47,14 +49,16 @@ public class ProjectController : Controller
             return NotFound();
         }
         Project project = projects[0];
-
-        List<Scene> scenes = project.Scenes;
+        
+        // TODO: implement a more secure way of checking for an aborted status
+        List<Scene> scenes = project.Scenes.Where(s => s.StatusId != 6).ToList();
         scenes.Sort((x, y) => x.Sequence.CompareTo(y.Sequence));
         List<PlotVM> plotter = new List<PlotVM>();
         int wordCount = 0;
         foreach (Scene sc in scenes)
         {
             wordCount += sc.Words;
+            string? status = _statusRepo.GetRecordByIdAsync(sc.StatusId).Result?.Name;
             PlotVM entry = new PlotVM
             {
                 Sequence = sc.Sequence,
@@ -62,6 +66,8 @@ public class ProjectController : Controller
                 WordCount = sc.Words,
                 TSF = wordCount,
                 POT = (wordCount / (float)project.Goal) * 100,
+                Plotline = sc.Plotline,
+                Status = status
             };
             entry.SetBeat();
             plotter.Add(entry);

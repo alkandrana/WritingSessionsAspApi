@@ -7,6 +7,8 @@ public class PlotVM
     public int WordCount { get; set; }
     public int TSF { get; set; }
     public double POT  { get; set; }
+    public string Plotline { get; set; } = "";
+    public string? Status { get; set; } = "";
 
     public string Beat  { get; set; }
 

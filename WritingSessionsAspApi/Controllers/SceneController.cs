@@ -59,6 +59,15 @@ public class SceneController : Controller
         return Ok(scenes);
     }
 
+    [HttpGet]
+    [Route("/scenes/name/{name}")]
+    public async Task<IActionResult> GetSceneByName(string name)
+    {
+        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc => sc.Name.ToLower().Contains(name.ToLower()), 
+            qu => qu.Include(sc => sc.Project));
+        return Ok(scenes);
+    }
+
     
 
     [HttpPost]
@@ -82,9 +91,16 @@ public class SceneController : Controller
         if (scene.Sequence == 0)
         {
             List<Scene> otherScenes = await _sceneRepo.GetSelectRecordsAsync(sc => sc.ProjectId == scene.ProjectId);
-            otherScenes.Sort((a, b) => a.Sequence.CompareTo(b.Sequence));
-            int lastSequence = otherScenes.Last().Sequence;
-            scene.Sequence = lastSequence + 1;
+            if (otherScenes.Any())
+            {
+                otherScenes.Sort((a, b) => a.Sequence.CompareTo(b.Sequence));
+                int lastSequence = otherScenes.Last().Sequence;
+                scene.Sequence = lastSequence + 1;
+            }
+            else
+            {
+                scene.Sequence = 1;
+            }
         }
         int rowsAffected = await _sceneRepo.CreateRecordAsync(scene);
         if (rowsAffected == 0)

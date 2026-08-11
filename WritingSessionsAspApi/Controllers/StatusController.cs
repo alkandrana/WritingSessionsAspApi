@@ -25,10 +25,6 @@ public class StatusController : Controller
     public async Task<IActionResult> GetOptionByName(string name)
     {
         List<Status> options = await _statusRepo.GetRecordByCodeAsync(name, "Name");
-        if (options.Count > 0)
-        {
-            return NotFound();
-        }
         return Ok(options);
     }
 }
