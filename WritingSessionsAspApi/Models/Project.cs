@@ -8,13 +8,20 @@ namespace WritingSessionsAspApi.Models;
 [Index(nameof(Code), nameof(AuthorId), IsUnique = true)]
 public class Project : Model
 {
-    [StringLength(5)] public string Code { get; set; } = string.Empty;
-    [StringLength(255)] public string Title { get; set; } = string.Empty;
-    [StringLength(255)] public string Series { get; set; } = string.Empty;
-    public int Goal { get; set; }
+    [StringLength(5)]
+    public string Code { get; set; } = string.Empty;
+
+    [StringLength(255)]
+    public string Title { get; set; } = string.Empty;
+
+    [StringLength(255)]
+    public string? Series { get; set; } = string.Empty;
+    public int Goal { get; set; } = 100000;
     public DateTime? Created { get; set; }
     public string? AuthorId { get; set; }
-    [ForeignKey("AuthorId")] public AppUser? Author { get; set; }
+
+    [ForeignKey("AuthorId")]
+    public AppUser? Author { get; set; }
 
     public List<Scene> Scenes { get; set; } = new List<Scene>();
 }
