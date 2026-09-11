@@ -6,6 +6,7 @@ using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
+
 [ApiController]
 [Route("scenes")]
 public class SceneController : Controller
@@ -18,7 +19,7 @@ public class SceneController : Controller
         _sceneRepo = sceneRepo;
         _projectRepo = projectRepo;
     }
-    
+
     // GET: /sessions
     [HttpGet]
     public async Task<IActionResult> GetAllScenes()
@@ -26,7 +27,7 @@ public class SceneController : Controller
         List<Scene> scenes = await _sceneRepo.GetAllRecordsAsync();
         return Ok(scenes);
     }
-    
+
     // GET: /sessions/:id
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetSceneById(int id)
@@ -55,7 +56,9 @@ public class SceneController : Controller
     [Route("/scenes/project/{projectId:int}")]
     public async Task<IActionResult> GetScenesByProject(int projectId)
     {
-        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc => sc.ProjectId == projectId);
+        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc =>
+            sc.ProjectId == projectId
+        );
         return Ok(scenes);
     }
 
@@ -63,34 +66,44 @@ public class SceneController : Controller
     [Route("/scenes/name/{name}")]
     public async Task<IActionResult> GetSceneByName(string name)
     {
-        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc => sc.Name.ToLower().Contains(name.ToLower()), 
-            qu => qu.Include(sc => sc.Project));
+        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(
+            sc => sc.Name.ToLower().Contains(name.ToLower()),
+            qu => qu.Include(sc => sc.Project)
+        );
         return Ok(scenes);
     }
-
-    
 
     [HttpPost]
     public async Task<IActionResult> CreateScene(Scene scene)
     {
+        Console.WriteLine("IN SCENE CREATE");
+        if (scene == null)
+        {
+            return BadRequest();
+        }
         if (scene.Created == null)
         {
             scene.Created = DateTime.UtcNow;
         }
-        List<Scene> duplicates = await _sceneRepo.GetSelectRecordsAsync(
-            sc => sc.Code.ToLower() == scene.Code.ToLower() && sc.ProjectId == scene.ProjectId);
+        List<Scene> duplicates = await _sceneRepo.GetSelectRecordsAsync(sc =>
+            sc.Code.ToLower() == scene.Code.ToLower() && sc.ProjectId == scene.ProjectId
+        );
         if (duplicates.Any())
         {
-            return Conflict(new ProblemDetails
-            {
-                Title = "Duplicate scene code",
-                Detail = "A scene with the same code already exists.",
-            });
+            return Conflict(
+                new ProblemDetails
+                {
+                    Title = "Duplicate scene code",
+                    Detail = "A scene with the same code already exists.",
+                }
+            );
         }
 
         if (scene.Sequence == 0)
         {
-            List<Scene> otherScenes = await _sceneRepo.GetSelectRecordsAsync(sc => sc.ProjectId == scene.ProjectId);
+            List<Scene> otherScenes = await _sceneRepo.GetSelectRecordsAsync(sc =>
+                sc.ProjectId == scene.ProjectId
+            );
             if (otherScenes.Any())
             {
                 otherScenes.Sort((a, b) => a.Sequence.CompareTo(b.Sequence));
@@ -111,7 +124,10 @@ public class SceneController : Controller
     }
 
     [HttpPatch("{id:int}")]
-    public async Task<IActionResult> UpdateScene([FromRoute] int id, [FromBody] JsonPatchDocument<Scene> sceneData)
+    public async Task<IActionResult> UpdateScene(
+        [FromRoute] int id,
+        [FromBody] JsonPatchDocument<Scene> sceneData
+    )
     {
         if (sceneData == null)
         {
