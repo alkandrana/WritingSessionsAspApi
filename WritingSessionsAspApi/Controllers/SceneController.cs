@@ -59,6 +59,10 @@ public class SceneController : Controller
         List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc =>
             sc.ProjectId == projectId
         );
+        if (scenes.Count == 0)
+        {
+            return NotFound();
+        }
         return Ok(scenes);
     }
 
@@ -70,6 +74,10 @@ public class SceneController : Controller
             sc => sc.Name.ToLower().Contains(name.ToLower()),
             qu => qu.Include(sc => sc.Project)
         );
+        if (scenes.Count == 0)
+        {
+            return NotFound();
+        }
         return Ok(scenes);
     }
 
