@@ -21,10 +21,23 @@ public class StatusController : Controller
         return Ok(statusOptions);
     }
 
-    [HttpGet("{name}")]
+    [HttpGet]
+    [Route("/status/name/{name}")]
     public async Task<IActionResult> GetOptionByName(string name)
     {
         List<Status> options = await _statusRepo.GetRecordByCodeAsync(name, "Name");
         return Ok(options);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetStatusById(int id)
+    {
+        Status? status = await _statusRepo.GetRecordByIdAsync(id);
+        if (status == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(status);
     }
 }
