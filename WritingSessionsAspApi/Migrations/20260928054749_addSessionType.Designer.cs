@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WritingSessionsAspApi.Data;
@@ -11,9 +12,11 @@ using WritingSessionsAspApi.Data;
 namespace WritingSessionsAspApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260928054749_addSessionType")]
+    partial class addSessionType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,7 +262,7 @@ namespace WritingSessionsAspApi.Migrations
                     b.HasIndex("Code", "AuthorId")
                         .IsUnique();
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("WritingSessionsAspApi.Models.Scene", b =>
@@ -311,7 +314,7 @@ namespace WritingSessionsAspApi.Migrations
                     b.HasIndex("Code", "ProjectId")
                         .IsUnique();
 
-                    b.ToTable("Scenes", (string)null);
+                    b.ToTable("Scenes");
                 });
 
             modelBuilder.Entity("WritingSessionsAspApi.Models.Session", b =>
@@ -356,7 +359,7 @@ namespace WritingSessionsAspApi.Migrations
                     b.HasIndex("StartTime", "StopTime")
                         .IsUnique();
 
-                    b.ToTable("Sessions", (string)null);
+                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("WritingSessionsAspApi.Models.Status", b =>
@@ -373,7 +376,7 @@ namespace WritingSessionsAspApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statuses", (string)null);
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

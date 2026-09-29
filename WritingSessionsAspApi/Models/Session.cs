@@ -14,6 +14,7 @@ public class Session : Model
     public Scene? Scene { get; set; }
     
     public AppUser? Author { get; set; }
+    public string Type { get; set; } = "";
     public string? Comments { get; set; }
 
     public double? Duration
