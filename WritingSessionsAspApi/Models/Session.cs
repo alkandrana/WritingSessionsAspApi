@@ -3,7 +3,7 @@ using WritingSessionsAspApi.Data.Contracts;
 
 namespace WritingSessionsAspApi.Models;
 
-[Index(nameof(StartTime), nameof(StopTime), IsUnique = true)]
+[Index(nameof(Date), nameof(Words), IsUnique = true)]
 public class Session : Model
 {
     public DateOnly Date { get; set; }

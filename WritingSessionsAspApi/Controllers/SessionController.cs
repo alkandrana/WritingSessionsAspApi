@@ -81,13 +81,13 @@ public class SessionController : Controller
         }
         session.Author = currentUser;
         List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(
-            ses => ses.StartTime != null && ses.StartTime == session.StartTime && ses.StopTime != null && ses.StopTime == session.StopTime);
+            ses => ses.Date == session.Date && ses.Words == session.Words);
         if (duplicates.Any())
         {
             return Conflict(new ProblemDetails
             {
                 Title = "Duplicate session timeframe",
-                Detail = "A session with those times already exists.",
+                Detail = "A session with those values already exists.",
             });
         }
         int rowsAffected = await _sessionRepo.CreateRecordAsync(session);
