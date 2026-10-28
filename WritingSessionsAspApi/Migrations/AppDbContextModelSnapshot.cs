@@ -325,6 +325,9 @@ namespace WritingSessionsAspApi.Migrations
                     b.Property<string>("AuthorId")
                         .HasColumnType("text");
 
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
                     b.Property<string>("Comments")
                         .HasColumnType("text");
 
