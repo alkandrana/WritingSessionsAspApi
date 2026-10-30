@@ -6,7 +6,7 @@ namespace WritingSessionsAspApi.Models;
 [Index(nameof(Date), nameof(Words), IsUnique = true)]
 public class Session : Model
 {
-    public String? Code { get; set; }
+    // public String? Code { get; set; }
     public DateOnly Date { get; set; }
     public DateTime? StartTime { get; set; }
     public DateTime? StopTime { get; set; }
