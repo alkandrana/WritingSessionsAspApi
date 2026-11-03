@@ -354,10 +354,10 @@ namespace WritingSessionsAspApi.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("SceneId");
-
-                    b.HasIndex("Date", "Words")
+                    b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("SceneId");
 
                     b.ToTable("Sessions");
                 });

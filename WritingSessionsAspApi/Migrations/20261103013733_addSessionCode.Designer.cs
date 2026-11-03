@@ -12,7 +12,7 @@ using WritingSessionsAspApi.Data;
 namespace WritingSessionsAspApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261028204134_addSessionCode")]
+    [Migration("20261103013733_addSessionCode")]
     partial class addSessionCode
     {
         /// <inheritdoc />
@@ -357,10 +357,10 @@ namespace WritingSessionsAspApi.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("SceneId");
-
-                    b.HasIndex("Date", "Words")
+                    b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("SceneId");
 
                     b.ToTable("Sessions");
                 });
