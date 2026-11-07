@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WritingSessionsAspApi.Data;
 using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
@@ -44,7 +43,12 @@ public class SceneController : Controller
     [Route("/scenes/code/{code}")]
     public async Task<IActionResult> GetSceneByCode(string code)
     {
-        List<Scene> scenes = await _sceneRepo.GetRecordByCodeAsync(code, "Code", sc => sc.Project);
+        List<Scene> scenes = await _sceneRepo.GetRecordByCodeAsync(
+            code,
+            "Code",
+            sc => sc.Project,
+            sc => sc.Status
+        );
         if (scenes.Count == 0)
         {
             return NotFound();
@@ -56,8 +60,9 @@ public class SceneController : Controller
     [Route("/scenes/project/{projectId:int}")]
     public async Task<IActionResult> GetScenesByProject(int projectId)
     {
-        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc =>
-            sc.ProjectId == projectId
+        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(
+            sc => sc.ProjectId == projectId,
+            qu => qu.Include(sc => sc.Project).Include(sc => sc.Status)
         );
         if (scenes.Count == 0)
         {
