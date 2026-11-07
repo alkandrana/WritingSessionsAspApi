@@ -57,8 +57,7 @@ public class SceneController : Controller
     public async Task<IActionResult> GetScenesByProject(int projectId)
     {
         List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(sc =>
-            sc.ProjectId == projectId
-        );
+            sc.ProjectId == projectId, qu => qu.Include(sc => sc.Project);
         if (scenes.Count == 0)
         {
             return NotFound();
