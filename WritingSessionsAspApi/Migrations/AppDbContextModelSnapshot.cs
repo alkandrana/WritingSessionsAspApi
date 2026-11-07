@@ -259,7 +259,7 @@ namespace WritingSessionsAspApi.Migrations
                     b.HasIndex("Code", "AuthorId")
                         .IsUnique();
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("WritingSessionsAspApi.Models.Scene", b =>
@@ -311,7 +311,7 @@ namespace WritingSessionsAspApi.Migrations
                     b.HasIndex("Code", "ProjectId")
                         .IsUnique();
 
-                    b.ToTable("Scenes", (string)null);
+                    b.ToTable("Scenes");
                 });
 
             modelBuilder.Entity("WritingSessionsAspApi.Models.Session", b =>
@@ -353,10 +353,10 @@ namespace WritingSessionsAspApi.Migrations
 
                     b.HasIndex("SceneId");
 
-                    b.HasIndex("StartTime", "StopTime")
+                    b.HasIndex("Date", "Words")
                         .IsUnique();
 
-                    b.ToTable("Sessions", (string)null);
+                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("WritingSessionsAspApi.Models.Status", b =>
@@ -373,7 +373,7 @@ namespace WritingSessionsAspApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statuses", (string)null);
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
