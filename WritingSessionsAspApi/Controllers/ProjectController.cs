@@ -99,6 +99,13 @@ public class ProjectController : Controller
         return Ok(projects);
     }
 
+    [HttpGet]
+    [Route("/projects/name/{title}")]
+    public async Task<IActionResult> GetProjectByTitle(string title){
+        List<Project> projects = await _projectRepo.GetSelectRecordsAsync(p => p.Title.ToLower().Contains(title.ToLower()));
+        return Ok(projects);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateProject(Project project)
     {
