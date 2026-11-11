@@ -92,10 +92,6 @@ public class ProjectController : Controller
     public async Task<IActionResult> GetProjectByCode(string code)
     {
         List<Project> projects = await _projectRepo.GetRecordByCodeAsync(code, "Code");
-        if (projects.Count == 0)
-        {
-            return NotFound();
-        }
         return Ok(projects);
     }
 
