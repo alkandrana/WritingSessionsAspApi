@@ -326,6 +326,7 @@ namespace WritingSessionsAspApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Code")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Comments")

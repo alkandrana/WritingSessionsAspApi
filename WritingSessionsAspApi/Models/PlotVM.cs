@@ -3,14 +3,14 @@ namespace WritingSessionsAspApi.Models;
 public class PlotVM
 {
     public int Sequence { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public int WordCount { get; set; }
     public int TSF { get; set; }
-    public double POT  { get; set; }
-    public string Plotline { get; set; } = "";
+    public double POT { get; set; }
+    public string? Plotline { get; set; } = "";
     public string? Status { get; set; } = "";
 
-    public string Beat  { get; set; }
+    public string Beat { get; set; } = "";
 
     public void SetBeat()
     {
@@ -21,7 +21,8 @@ public class PlotVM
         else if (POT < 20)
         {
             Beat = "Inciting Incident";
-        } else if (POT < 30)
+        }
+        else if (POT < 30)
         {
             Beat = "Threshold";
         }
@@ -132,7 +133,7 @@ public class PlotVM
         // else if (POT >= 84 && POT < 88)
         // {
         //     Beat = "Seizing the Sword";
-        // } 
+        // }
         // else if (POT >= 88 && POT < 92)
         // {
         //     Beat = "Ultimate Defeat";
@@ -147,3 +148,4 @@ public class PlotVM
         // }
     }
 }
+
