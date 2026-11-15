@@ -60,9 +60,9 @@ public class ProjectController : Controller
             return NotFound();
         }
         Project project = projects[0];
-
+        int abortId = _statusRepo.GetRecordByCodeAsync("Aborted", "Name").Result.First().Id;
         // TODO: implement a more secure way of checking for an aborted status
-        List<Scene> scenes = project.Scenes.Where(s => s.StatusId != 6).ToList();
+        List<Scene> scenes = project.Scenes.Where(s => s.StatusId != abortId).ToList();
         scenes.Sort((x, y) => x.Sequence.CompareTo(y.Sequence));
         List<PlotVM> plotter = new List<PlotVM>();
         int wordCount = 0;

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("scenes")]
 public class SceneController : Controller
