@@ -39,7 +39,7 @@ public class SessionController : Controller
                 qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project));
         return Ok(sessions);
     }
-    [HttpGet("{code:string}")]
+    [HttpGet("{code}")]
     public async Task<IActionResult> GetSessionByCode(string code)
     {
         Session? session = await _sessionRepo.GetRecordByCodeAsync(code, "Code");
