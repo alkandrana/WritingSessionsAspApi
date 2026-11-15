@@ -8,6 +8,7 @@ using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
+
 [ApiController]
 [Route("sessions")]
 [Authorize]
@@ -22,7 +23,7 @@ public class SessionController : Controller
         _userManager = userManager;
         _ctx = ctx;
     }
-    
+
     // GET: /sessions
     [HttpGet]
     public async Task<IActionResult> GetAllSessions()
@@ -38,7 +39,17 @@ public class SessionController : Controller
                 qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project));
         return Ok(sessions);
     }
-    
+    [HttpGet("{code:string}")]
+    public async Task<IActionResult> GetSessionByCode(string code)
+    {
+        Session? session = await _sessionRepo.GetRecordByCodeAsync(code, "Code");
+        if (session == null)
+        {
+            return NotFound();
+        }
+        return Ok(session);
+    }
+
     // GET: /sessions/:id
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetOneSession(int id)
@@ -56,7 +67,7 @@ public class SessionController : Controller
     public async Task<IActionResult> GetSessionsByScene(int sceneId)
     {
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
-            ses => ses.SceneId == sceneId, 
+            ses => ses.SceneId == sceneId,
             qu => qu.Include(s => s.Scene));
         return Ok(sessions);
     }
@@ -138,6 +149,6 @@ public class SessionController : Controller
         }
         return NoContent();
     }
-        
-    
+
+
 }

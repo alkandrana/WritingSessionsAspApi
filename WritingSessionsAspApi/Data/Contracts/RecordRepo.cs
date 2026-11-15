@@ -56,8 +56,8 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity>
         return record;
     }
 
-    public async Task<List<TEntity>> GetRecordByCodeAsync(
-        string code,
+    public async Task<TEntity?> GetRecordByCodeAsync(
+        string value,
         string propName,
         params Expression<Func<TEntity, object>>[] includes
     )
@@ -67,10 +67,9 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity>
         {
             query = query.Include(include);
         }
-        List<TEntity> records = await query
-            .Where(e => EF.Property<string>(e, propName).ToLower() == code.ToLower())
-            .ToListAsync();
-        return records;
+        TEntity? record = await query
+            .SingleOrDefaultAsync(e => EF.Property<string>(e, propName).ToLower() == value.ToLower());
+        return record;
     }
 
     // public async Task<bool> Check

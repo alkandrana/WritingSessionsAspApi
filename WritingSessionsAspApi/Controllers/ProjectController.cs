@@ -50,17 +50,25 @@ public class ProjectController : Controller
     [Route("/projects/plotter/{projectCode}")]
     public async Task<IActionResult> GetPlotter(string projectCode)
     {
-        List<Project> projects = await _projectRepo.GetRecordByCodeAsync(
+        Project? project = await _projectRepo.GetRecordByCodeAsync(
             projectCode,
             "Code",
             p => p.Scenes
         );
-        if (projects.Count == 0)
+        if (project == null)
         {
             return NotFound();
         }
-        Project project = projects[0];
-        int abortId = _statusRepo.GetRecordByCodeAsync("Aborted", "Name").Result.First().Id;
+        Status? abortStatus = await _statusRepo.GetRecordByCodeAsync("Aborted", "Name");
+        int abortId;
+        if (abortStatus != null)
+        {
+            abortId = abortStatus.Id;
+        }
+        else
+        {
+            abortId = 0;
+        }
         // TODO: implement a more secure way of checking for an aborted status
         List<Scene> scenes = project.Scenes.Where(s => s.StatusId != abortId).ToList();
         scenes.Sort((x, y) => x.Sequence.CompareTo(y.Sequence));
@@ -106,12 +114,12 @@ public class ProjectController : Controller
     [Route("/projects/code/{code}")]
     public async Task<IActionResult> GetProjectByCode(string code)
     {
-        List<Project> projects = await _projectRepo.GetRecordByCodeAsync(code, "Code");
-        if (projects.Count == 0)
+        Project? project = await _projectRepo.GetRecordByCodeAsync(code, "Code");
+        if (project == null)
         {
             return NotFound();
         }
-        return Ok(projects);
+        return Ok(project);
     }
 
     [HttpGet]
@@ -137,8 +145,8 @@ public class ProjectController : Controller
         {
             project.Created = DateTime.UtcNow;
         }
-        List<Project> duplicates = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
-        if (duplicates.Count > 0)
+        Project? duplicate = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
+        if (duplicate != null)
         {
             return Conflict(
                 new ProblemDetails
