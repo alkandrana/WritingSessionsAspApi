@@ -17,7 +17,12 @@ public class SessionController : Controller
     private readonly IRecordRepo<Session> _sessionRepo;
     private readonly UserManager<AppUser> _userManager;
     private readonly AppDbContext _ctx;
-    public SessionController(IRecordRepo<Session> sessionRepo, UserManager<AppUser> userManager, AppDbContext ctx)
+
+    public SessionController(
+        IRecordRepo<Session> sessionRepo,
+        UserManager<AppUser> userManager,
+        AppDbContext ctx
+    )
     {
         _sessionRepo = sessionRepo;
         _userManager = userManager;
@@ -33,13 +38,14 @@ public class SessionController : Controller
         {
             return Unauthorized();
         }
-        List<Session> sessions = await _sessionRepo
-            .GetSelectRecordsAsync(
-                s => s.Author.Id == currentUser.Id,
-                qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project));
+        List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
+            s => s.Author.Id == currentUser.Id,
+            qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project)
+        );
         return Ok(sessions);
     }
-    [HttpGet("{code}")]
+
+    [HttpGet("code/{code}")]
     public async Task<IActionResult> GetSessionByCode(string code)
     {
         Session? session = await _sessionRepo.GetRecordByCodeAsync(code, "Code");
@@ -68,7 +74,8 @@ public class SessionController : Controller
     {
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
             ses => ses.SceneId == sceneId,
-            qu => qu.Include(s => s.Scene));
+            qu => qu.Include(s => s.Scene)
+        );
         return Ok(sessions);
     }
 
@@ -78,7 +85,8 @@ public class SessionController : Controller
     {
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
             ses => ses.Scene.ProjectId == projectId,
-            qu => qu.Include(s => s.Scene));
+            qu => qu.Include(s => s.Scene)
+        );
         return Ok(sessions);
     }
 
@@ -91,15 +99,18 @@ public class SessionController : Controller
             return Unauthorized();
         }
         session.Author = currentUser;
-        List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(
-            ses => ses.Date == session.Date && ses.Words == session.Words);
+        List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(ses =>
+            ses.Date == session.Date && ses.Words == session.Words
+        );
         if (duplicates.Any())
         {
-            return Conflict(new ProblemDetails
-            {
-                Title = "Duplicate session timeframe",
-                Detail = "A session with those values already exists.",
-            });
+            return Conflict(
+                new ProblemDetails
+                {
+                    Title = "Duplicate session timeframe",
+                    Detail = "A session with those values already exists.",
+                }
+            );
         }
         int rowsAffected = await _sessionRepo.CreateRecordAsync(session);
         if (rowsAffected == 0)
@@ -110,7 +121,10 @@ public class SessionController : Controller
     }
 
     [HttpPatch("{id:int}")]
-    public async Task<IActionResult> UpdateSession([FromRoute] int id, [FromBody] JsonPatchDocument<Session> sessionData)
+    public async Task<IActionResult> UpdateSession(
+        [FromRoute] int id,
+        [FromBody] JsonPatchDocument<Session> sessionData
+    )
     {
         if (sessionData == null)
         {
@@ -149,6 +163,4 @@ public class SessionController : Controller
         }
         return NoContent();
     }
-
-
 }
