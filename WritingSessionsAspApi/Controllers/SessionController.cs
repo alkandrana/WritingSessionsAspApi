@@ -39,9 +39,14 @@ public class SessionController : Controller
             return Unauthorized();
         }
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
-            s => s.Author.Id == currentUser.Id,
+            s => s.AuthorId == currentUser.Id,
             qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project)
         );
+        sessions = sessions
+            .OrderBy(s => s.Date)
+            .ThenBy(s => s.StartTime)
+            .ThenBy(s => s.StopTime)
+            .ToList();
         return Ok(sessions);
     }
 

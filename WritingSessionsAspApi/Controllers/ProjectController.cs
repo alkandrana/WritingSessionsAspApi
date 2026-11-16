@@ -40,9 +40,11 @@ public class ProjectController : Controller
         {
             return Unauthorized();
         }
-        List<Project> projects = await _projectRepo.GetSelectRecordsAsync(p =>
-            p.AuthorId == currentUser.Id
-        );
+        List<Project> projects = _projectRepo
+            .GetSelectRecordsAsync(p => p.AuthorId == currentUser.Id)
+            .Result.OrderBy(p => p.Series)
+            .ThenBy(p => p.Volume)
+            .ToList();
         return Ok(projects);
     }
 

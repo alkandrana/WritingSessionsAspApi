@@ -13,7 +13,7 @@ public class Session : Model
     public int Words { get; set; }
     public int SceneId { get; set; }
     public Scene? Scene { get; set; }
-
+    public string AuthorId { get; set; } = "";
     public AppUser? Author { get; set; }
     public string Type { get; set; } = "";
     public string? Comments { get; set; }

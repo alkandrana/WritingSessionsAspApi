@@ -10,6 +10,7 @@ public class Project : Model
 {
     [StringLength(5)]
     public string Code { get; set; } = string.Empty;
+    public int Volume { get; set; }
 
     [StringLength(255)]
     public string Title { get; set; } = string.Empty;

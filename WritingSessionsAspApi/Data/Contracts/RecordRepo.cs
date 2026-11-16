@@ -67,8 +67,9 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity>
         {
             query = query.Include(include);
         }
-        TEntity? record = await query
-            .SingleOrDefaultAsync(e => EF.Property<string>(e, propName).ToLower() == value.ToLower());
+        TEntity? record = await query.SingleOrDefaultAsync(e =>
+            EF.Property<string>(e, propName).ToLower() == value.ToLower()
+        );
         return record;
     }
 
@@ -104,4 +105,3 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity>
         return await _ctx.SaveChangesAsync();
     }
 }
-

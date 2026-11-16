@@ -31,4 +31,3 @@ public interface IRecordRepo<TEntity>
 
     public Task<int> DeleteRecordAsync(TEntity record);
 }
-
