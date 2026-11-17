@@ -17,7 +17,7 @@ public interface IRecordRepo<TEntity>
         params Expression<Func<TEntity, object>>[] includes
     );
 
-    public Task<TEntity?> GetRecordByCodeAsync(
+    public Task<TEntity?> GetRecordByUniquePropAsync(
         string value,
         string propName,
         params Expression<Func<TEntity, object>>[] includes

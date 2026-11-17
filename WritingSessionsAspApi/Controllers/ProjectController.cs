@@ -52,7 +52,7 @@ public class ProjectController : Controller
     [Route("/projects/plotter/{projectCode}")]
     public async Task<IActionResult> GetPlotter(string projectCode)
     {
-        Project? project = await _projectRepo.GetRecordByCodeAsync(
+        Project? project = await _projectRepo.GetRecordByUniquePropAsync(
             projectCode,
             "Code",
             p => p.Scenes
@@ -61,7 +61,7 @@ public class ProjectController : Controller
         {
             return NotFound();
         }
-        Status? abortStatus = await _statusRepo.GetRecordByCodeAsync("Aborted", "Name");
+        Status? abortStatus = await _statusRepo.GetRecordByUniquePropAsync("Aborted", "Name");
         int abortId;
         if (abortStatus != null)
         {
@@ -116,7 +116,7 @@ public class ProjectController : Controller
     [Route("/projects/code/{code}")]
     public async Task<IActionResult> GetProjectByCode(string code)
     {
-        Project? project = await _projectRepo.GetRecordByCodeAsync(code, "Code");
+        Project? project = await _projectRepo.GetRecordByUniquePropAsync(code, "Code");
         if (project == null)
         {
             return NotFound();
@@ -147,7 +147,7 @@ public class ProjectController : Controller
         {
             project.Created = DateTime.UtcNow;
         }
-        Project? duplicate = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
+        Project? duplicate = await _projectRepo.GetRecordByUniquePropAsync(project.Code, "Code");
         if (duplicate != null)
         {
             return Conflict(

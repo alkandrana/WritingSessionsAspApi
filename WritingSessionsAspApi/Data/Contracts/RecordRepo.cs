@@ -56,7 +56,7 @@ public class RecordRepo<TEntity> : IRecordRepo<TEntity>
         return record;
     }
 
-    public async Task<TEntity?> GetRecordByCodeAsync(
+    public async Task<TEntity?> GetRecordByUniquePropAsync(
         string value,
         string propName,
         params Expression<Func<TEntity, object>>[] includes

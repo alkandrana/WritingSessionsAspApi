@@ -53,7 +53,7 @@ public class SessionController : Controller
     [HttpGet("code/{code}")]
     public async Task<IActionResult> GetSessionByCode(string code)
     {
-        Session? session = await _sessionRepo.GetRecordByCodeAsync(code, "Code");
+        Session? session = await _sessionRepo.GetRecordByUniquePropAsync(code, "Code");
         if (session == null)
         {
             return NotFound();

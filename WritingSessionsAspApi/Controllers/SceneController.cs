@@ -49,7 +49,7 @@ public class SceneController : Controller
     [Route("/scenes/code/{code}")]
     public async Task<IActionResult> GetSceneByCode(string code)
     {
-        Scene? scene = await _sceneRepo.GetRecordByCodeAsync(
+        Scene? scene = await _sceneRepo.GetRecordByUniquePropAsync(
             code,
             "Code",
             sc => sc.Project,

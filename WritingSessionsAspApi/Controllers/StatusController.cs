@@ -26,7 +26,7 @@ public class StatusController : Controller
     [Route("/status/name/{name}")]
     public async Task<IActionResult> GetOptionByName(string name)
     {
-        Status? status = await _statusRepo.GetRecordByCodeAsync(name, "Name");
+        Status? status = await _statusRepo.GetRecordByUniquePropAsync(name, "Name");
         if (status == null)
         {
             return NotFound();
