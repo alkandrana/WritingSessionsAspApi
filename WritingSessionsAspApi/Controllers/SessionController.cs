@@ -105,7 +105,7 @@ public class SessionController : Controller
         }
         session.Author = currentUser;
         List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(ses =>
-            ses.Date == session.Date && ses.Words == session.Words
+            ses.Code == session.Code
         );
         if (duplicates.Any())
         {
