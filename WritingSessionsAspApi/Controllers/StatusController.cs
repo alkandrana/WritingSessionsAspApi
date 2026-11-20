@@ -3,6 +3,7 @@ using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
+
 [ApiController]
 [Route("status")]
 public class StatusController : Controller
@@ -25,8 +26,12 @@ public class StatusController : Controller
     [Route("/status/name/{name}")]
     public async Task<IActionResult> GetOptionByName(string name)
     {
-        List<Status> options = await _statusRepo.GetRecordByCodeAsync(name, "Name");
-        return Ok(options);
+        Status? status = await _statusRepo.GetRecordByUniquePropAsync(name, "Name");
+        if (status == null)
+        {
+            return NotFound();
+        }
+        return Ok(status);
     }
 
     [HttpGet("{id}")]

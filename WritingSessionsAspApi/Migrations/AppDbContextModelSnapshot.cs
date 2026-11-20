@@ -252,6 +252,9 @@ namespace WritingSessionsAspApi.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<int>("Volume")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
@@ -323,6 +326,11 @@ namespace WritingSessionsAspApi.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Comments")
@@ -351,10 +359,10 @@ namespace WritingSessionsAspApi.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("SceneId");
-
-                    b.HasIndex("Date", "Words")
+                    b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("SceneId");
 
                     b.ToTable("Sessions");
                 });
@@ -372,6 +380,9 @@ namespace WritingSessionsAspApi.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Statuses");
                 });
@@ -459,7 +470,9 @@ namespace WritingSessionsAspApi.Migrations
                 {
                     b.HasOne("WritingSessionsAspApi.Models.AppUser", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorId");
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("WritingSessionsAspApi.Models.Scene", "Scene")
                         .WithMany()

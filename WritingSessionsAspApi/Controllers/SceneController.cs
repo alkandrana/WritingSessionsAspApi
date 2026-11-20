@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("scenes")]
 public class SceneController : Controller
@@ -23,7 +25,11 @@ public class SceneController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAllScenes()
     {
-        List<Scene> scenes = await _sceneRepo.GetAllRecordsAsync();
+        List<Scene> scenes = _sceneRepo
+            .GetAllRecordsAsync()
+            .Result.OrderBy(sc => sc.ProjectId)
+            .ThenBy(sc => sc.Sequence)
+            .ToList();
         return Ok(scenes);
     }
 
@@ -43,27 +49,30 @@ public class SceneController : Controller
     [Route("/scenes/code/{code}")]
     public async Task<IActionResult> GetSceneByCode(string code)
     {
-        List<Scene> scenes = await _sceneRepo.GetRecordByCodeAsync(
+        Scene? scene = await _sceneRepo.GetRecordByUniquePropAsync(
             code,
             "Code",
             sc => sc.Project,
             sc => sc.Status
         );
-        if (scenes.Count == 0)
+        if (scene == null)
         {
             return NotFound();
         }
-        return Ok(scenes);
+        return Ok(scene);
     }
 
     [HttpGet]
     [Route("/scenes/project/{projectId:int}")]
     public async Task<IActionResult> GetScenesByProject(int projectId)
     {
-        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(
-            sc => sc.ProjectId == projectId,
-            qu => qu.Include(sc => sc.Project).Include(sc => sc.Status)
-        );
+        List<Scene> scenes = _sceneRepo
+            .GetSelectRecordsAsync(
+                sc => sc.ProjectId == projectId,
+                qu => qu.Include(sc => sc.Project).Include(sc => sc.Status)
+            )
+            .Result.OrderBy(sc => sc.Sequence)
+            .ToList();
         if (scenes.Count == 0)
         {
             return NotFound();

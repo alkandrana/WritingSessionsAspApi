@@ -6,6 +6,7 @@ using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
+
 [ApiController]
 [Route("projects")]
 [Authorize]
@@ -16,14 +17,19 @@ public class ProjectController : Controller
     private readonly IRecordRepo<Status> _statusRepo;
     private readonly UserManager<AppUser> _userManager;
 
-    public ProjectController(IRecordRepo<Project> projectRepo, UserManager<AppUser> userManager, IRecordRepo<Scene> sceneRepo, IRecordRepo<Status> statusRepo)
+    public ProjectController(
+        IRecordRepo<Project> projectRepo,
+        UserManager<AppUser> userManager,
+        IRecordRepo<Scene> sceneRepo,
+        IRecordRepo<Status> statusRepo
+    )
     {
         _projectRepo = projectRepo;
         _userManager = userManager;
         _sceneRepo = sceneRepo;
         _statusRepo = statusRepo;
     }
-    
+
     // GET: /projects
     [HttpGet]
     public async Task<IActionResult> GetAllProjects()
@@ -34,7 +40,11 @@ public class ProjectController : Controller
         {
             return Unauthorized();
         }
-        List<Project> projects = await _projectRepo.GetSelectRecordsAsync(p => p.AuthorId == currentUser.Id);
+        List<Project> projects = _projectRepo
+            .GetSelectRecordsAsync(p => p.AuthorId == currentUser.Id)
+            .Result.OrderBy(p => p.Series)
+            .ThenBy(p => p.Volume)
+            .ToList();
         return Ok(projects);
     }
 
@@ -42,16 +52,27 @@ public class ProjectController : Controller
     [Route("/projects/plotter/{projectCode}")]
     public async Task<IActionResult> GetPlotter(string projectCode)
     {
-        List<Project> projects = await _projectRepo.GetRecordByCodeAsync(
-            projectCode, "Code", p => p.Scenes);
-        if (projects.Count == 0)
+        Project? project = await _projectRepo.GetRecordByUniquePropAsync(
+            projectCode,
+            "Code",
+            p => p.Scenes
+        );
+        if (project == null)
         {
             return NotFound();
         }
-        Project project = projects[0];
-        
+        Status? abortStatus = await _statusRepo.GetRecordByUniquePropAsync("Aborted", "Name");
+        int abortId;
+        if (abortStatus != null)
+        {
+            abortId = abortStatus.Id;
+        }
+        else
+        {
+            abortId = 0;
+        }
         // TODO: implement a more secure way of checking for an aborted status
-        List<Scene> scenes = project.Scenes.Where(s => s.StatusId != 6).ToList();
+        List<Scene> scenes = project.Scenes.Where(s => s.StatusId != abortId).ToList();
         scenes.Sort((x, y) => x.Sequence.CompareTo(y.Sequence));
         List<PlotVM> plotter = new List<PlotVM>();
         int wordCount = 0;
@@ -59,6 +80,10 @@ public class ProjectController : Controller
         {
             wordCount += sc.Words;
             string? status = _statusRepo.GetRecordByIdAsync(sc.StatusId).Result?.Name;
+            if (sc.Plotline == null)
+            {
+                sc.Plotline = "";
+            }
             PlotVM entry = new PlotVM
             {
                 Sequence = sc.Sequence,
@@ -67,7 +92,7 @@ public class ProjectController : Controller
                 TSF = wordCount,
                 POT = (wordCount / (float)project.Goal) * 100,
                 Plotline = sc.Plotline,
-                Status = status
+                Status = status,
             };
             entry.SetBeat();
             plotter.Add(entry);
@@ -91,11 +116,21 @@ public class ProjectController : Controller
     [Route("/projects/code/{code}")]
     public async Task<IActionResult> GetProjectByCode(string code)
     {
-        List<Project> projects = await _projectRepo.GetRecordByCodeAsync(code, "Code");
-        if (projects.Count == 0)
+        Project? project = await _projectRepo.GetRecordByUniquePropAsync(code, "Code");
+        if (project == null)
         {
             return NotFound();
         }
+        return Ok(project);
+    }
+
+    [HttpGet]
+    [Route("/projects/name/{title}")]
+    public async Task<IActionResult> GetProjectByTitle(string title)
+    {
+        List<Project> projects = await _projectRepo.GetSelectRecordsAsync(p =>
+            p.Title.ToLower().Contains(title.ToLower())
+        );
         return Ok(projects);
     }
 
@@ -112,14 +147,16 @@ public class ProjectController : Controller
         {
             project.Created = DateTime.UtcNow;
         }
-        List<Project> duplicates = await _projectRepo.GetRecordByCodeAsync(project.Code, "Code");
-        if (duplicates.Count > 0)
+        Project? duplicate = await _projectRepo.GetRecordByUniquePropAsync(project.Code, "Code");
+        if (duplicate != null)
         {
-            return Conflict(new ProblemDetails
-            {
-                Title = "Duplicate code",
-                Detail = "A project with the same code already exists.",
-            });
+            return Conflict(
+                new ProblemDetails
+                {
+                    Title = "Duplicate code",
+                    Detail = "A project with the same code already exists.",
+                }
+            );
         }
         int rowsAffected = await _projectRepo.CreateRecordAsync(project);
         if (rowsAffected == 0)
@@ -134,7 +171,10 @@ public class ProjectController : Controller
     // Path refers to the property you're targeting
     // If changing more than one property, send array of objects
     // Even if only changing one property, must be formatted as an array
-    public async Task<IActionResult> UpdateProject([FromRoute] int id, [FromBody] JsonPatchDocument<Project> projectData)
+    public async Task<IActionResult> UpdateProject(
+        [FromRoute] int id,
+        [FromBody] JsonPatchDocument<Project> projectData
+    )
     {
         if (projectData == null)
         {

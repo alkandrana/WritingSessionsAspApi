@@ -8,6 +8,7 @@ using WritingSessionsAspApi.Data.Contracts;
 using WritingSessionsAspApi.Models;
 
 namespace WritingSessionsAspApi.Controllers;
+
 [ApiController]
 [Route("sessions")]
 [Authorize]
@@ -16,13 +17,18 @@ public class SessionController : Controller
     private readonly IRecordRepo<Session> _sessionRepo;
     private readonly UserManager<AppUser> _userManager;
     private readonly AppDbContext _ctx;
-    public SessionController(IRecordRepo<Session> sessionRepo, UserManager<AppUser> userManager, AppDbContext ctx)
+
+    public SessionController(
+        IRecordRepo<Session> sessionRepo,
+        UserManager<AppUser> userManager,
+        AppDbContext ctx
+    )
     {
         _sessionRepo = sessionRepo;
         _userManager = userManager;
         _ctx = ctx;
     }
-    
+
     // GET: /sessions
     [HttpGet]
     public async Task<IActionResult> GetAllSessions()
@@ -32,13 +38,29 @@ public class SessionController : Controller
         {
             return Unauthorized();
         }
-        List<Session> sessions = await _sessionRepo
-            .GetSelectRecordsAsync(
-                s => s.Author.Id == currentUser.Id,
-                qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project));
+        List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
+            s => s.AuthorId == currentUser.Id,
+            qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project)
+        );
+        sessions = sessions
+            .OrderBy(s => s.Date)
+            .ThenBy(s => s.StartTime)
+            .ThenBy(s => s.StopTime)
+            .ToList();
         return Ok(sessions);
     }
-    
+
+    [HttpGet("code/{code}")]
+    public async Task<IActionResult> GetSessionByCode(string code)
+    {
+        Session? session = await _sessionRepo.GetRecordByUniquePropAsync(code, "Code");
+        if (session == null)
+        {
+            return NotFound();
+        }
+        return Ok(session);
+    }
+
     // GET: /sessions/:id
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetOneSession(int id)
@@ -56,8 +78,9 @@ public class SessionController : Controller
     public async Task<IActionResult> GetSessionsByScene(int sceneId)
     {
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
-            ses => ses.SceneId == sceneId, 
-            qu => qu.Include(s => s.Scene));
+            ses => ses.SceneId == sceneId,
+            qu => qu.Include(s => s.Scene)
+        );
         return Ok(sessions);
     }
 
@@ -67,7 +90,8 @@ public class SessionController : Controller
     {
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
             ses => ses.Scene.ProjectId == projectId,
-            qu => qu.Include(s => s.Scene));
+            qu => qu.Include(s => s.Scene)
+        );
         return Ok(sessions);
     }
 
@@ -80,15 +104,18 @@ public class SessionController : Controller
             return Unauthorized();
         }
         session.Author = currentUser;
-        List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(
-            ses => ses.Date == session.Date && ses.Words == session.Words);
+        List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(ses =>
+            ses.Code == session.Code
+        );
         if (duplicates.Any())
         {
-            return Conflict(new ProblemDetails
-            {
-                Title = "Duplicate session timeframe",
-                Detail = "A session with those values already exists.",
-            });
+            return Conflict(
+                new ProblemDetails
+                {
+                    Title = "Duplicate session timeframe",
+                    Detail = "A session with those values already exists.",
+                }
+            );
         }
         int rowsAffected = await _sessionRepo.CreateRecordAsync(session);
         if (rowsAffected == 0)
@@ -99,7 +126,10 @@ public class SessionController : Controller
     }
 
     [HttpPatch("{id:int}")]
-    public async Task<IActionResult> UpdateSession([FromRoute] int id, [FromBody] JsonPatchDocument<Session> sessionData)
+    public async Task<IActionResult> UpdateSession(
+        [FromRoute] int id,
+        [FromBody] JsonPatchDocument<Session> sessionData
+    )
     {
         if (sessionData == null)
         {
@@ -138,6 +168,4 @@ public class SessionController : Controller
         }
         return NoContent();
     }
-        
-    
 }
