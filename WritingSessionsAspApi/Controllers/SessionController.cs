@@ -39,6 +39,7 @@ public class SessionController : Controller
             return Unauthorized();
         }
         List<Session> sessions = await _sessionRepo.GetSelectRecordsAsync(
+<<<<<<< Updated upstream
             s => s.AuthorId == currentUser.Id,
             qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project)
         );
@@ -61,6 +62,14 @@ public class SessionController : Controller
         return Ok(session);
     }
 
+=======
+            s => s.Author.Id == currentUser.Id,
+            qu => qu.Include(s => s.Scene).ThenInclude(sc => sc.Project)
+        );
+        return Ok(sessions);
+    }
+
+>>>>>>> Stashed changes
     // GET: /sessions/:id
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetOneSession(int id)
@@ -105,7 +114,7 @@ public class SessionController : Controller
         }
         session.Author = currentUser;
         List<Session> duplicates = await _sessionRepo.GetSelectRecordsAsync(ses =>
-            ses.Code == session.Code
+            ses.Code == session.Code && ses.AuthorId == currentUser.Id
         );
         if (duplicates.Any())
         {
