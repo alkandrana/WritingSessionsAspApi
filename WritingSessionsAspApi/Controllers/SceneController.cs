@@ -25,12 +25,13 @@ public class SceneController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAllScenes()
     {
-        List<Scene> scenes = _sceneRepo
-            .GetAllRecordsAsync()
-            .Result.OrderBy(sc => sc.ProjectId)
+        List<Scene> scenes = await _sceneRepo.GetAllRecordsAsync();
+
+        List<Scene> sortedScenes = scenes
+            .OrderBy(sc => sc.ProjectId)
             .ThenBy(sc => sc.Sequence)
             .ToList();
-        return Ok(scenes);
+        return Ok(sortedScenes);
     }
 
     // GET: /sessions/:id
@@ -66,18 +67,17 @@ public class SceneController : Controller
     [Route("/scenes/project/{projectId:int}")]
     public async Task<IActionResult> GetScenesByProject(int projectId)
     {
-        List<Scene> scenes = _sceneRepo
-            .GetSelectRecordsAsync(
-                sc => sc.ProjectId == projectId,
-                qu => qu.Include(sc => sc.Project).Include(sc => sc.Status)
-            )
-            .Result.OrderBy(sc => sc.Sequence)
-            .ToList();
+        List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(
+            sc => sc.ProjectId == projectId,
+            qu => qu.Include(sc => sc.Project).Include(sc => sc.Status)
+        );
+
+        List<Scene> sortedScenes = scenes.OrderBy(sc => sc.Sequence).ToList();
         if (scenes.Count == 0)
         {
             return NotFound();
         }
-        return Ok(scenes);
+        return Ok(sortedScenes);
     }
 
     [HttpGet]
@@ -86,7 +86,7 @@ public class SceneController : Controller
     {
         List<Scene> scenes = await _sceneRepo.GetSelectRecordsAsync(
             sc => sc.Name.ToLower().Contains(name.ToLower()),
-            qu => qu.Include(sc => sc.Project)
+            qu => qu.Include(sc => sc.Project).Include(sc => sc.Status)
         );
         if (scenes.Count == 0)
         {
